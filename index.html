@@ -1,0 +1,707 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Python for ML - Interactive Curriculum</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Icons -->
+  <link href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/regular/style.css" rel="stylesheet">
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <!-- Prism.js for code highlighting -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/themes/prism-okaidia.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/prism.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-python.min.js"></script>
+  <style>
+    :root {
+      --bg: #0b1020;
+      --card: #0f1630;
+      --muted: #9fb0ff;
+      --acc1: #6ee7ff;
+      --acc2: #a78bfa;
+      --acc3: #22d3ee;
+      --ring: rgba(128,189,255,.35);
+      --text: #e8ecff;
+      --text-dim: #b7c1ff;
+      --grad: radial-gradient(1200px 600px at 80% -10%, rgba(99,102,241,.22), transparent 50%),
+              radial-gradient(900px 500px at -10% 20%, rgba(34,211,238,.18), transparent 60%),
+              radial-gradient(700px 500px at 50% 120%, rgba(168,85,247,.18), transparent 60%);
+    }
+    html, body { background: var(--bg); color: var(--text); }
+    .glass {
+      background: linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.02));
+      border: 1px solid rgba(255,255,255,.08);
+      box-shadow: 0 10px 30px rgba(0,0,0,.25), inset 0 1px 0 rgba(255,255,255,.06);
+      backdrop-filter: blur(10px);
+    }
+    .btn {
+      transition: transform .15s ease, box-shadow .2s ease, background .2s ease;
+      box-shadow: 0 8px 20px rgba(80,120,255,.18);
+    }
+    .btn:active { transform: translateY(1px) scale(.99); }
+    .chip { background: rgba(110,231,255,.1); border: 1px solid rgba(110,231,255,.25); color: var(--muted); }
+    .shine {
+      position: relative; overflow: hidden;
+    }
+    .shine:before {
+      content: ""; position: absolute; inset: -150%;
+      background: conic-gradient(from 180deg at 50% 50%, transparent 0 20%, rgba(255,255,255,.05) 25% 35%, transparent 40% 100%);
+      animation: spin 8s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .grad-txt {
+      background: linear-gradient(90deg, #93c5fd, #a78bfa, #22d3ee);
+      -webkit-background-clip: text; background-clip: text; color: transparent;
+    }
+    .ring-anim { box-shadow: 0 0 0 0 var(--ring); animation: pulse 2.4s ease-out infinite; }
+    @keyframes pulse { to { box-shadow: 0 0 0 22px rgba(128,189,255,0); } }
+    .section-card { transition: transform .25s ease, box-shadow .25s ease; }
+    .section-card:hover { transform: translateY(-4px); box-shadow: 0 18px 40px rgba(0,0,0,.35); }
+    .code-actions button {
+      background: rgba(255,255,255,.06);
+      border: 1px solid rgba(255,255,255,.12);
+    }
+    .kpi {
+      background: linear-gradient(180deg, rgba(110,231,255,.08), rgba(110,231,255,.02));
+      border: 1px solid rgba(110,231,255,.25);
+    }
+    .sticky-tabs::-webkit-scrollbar { height: 6px; }
+    .sticky-tabs::-webkit-scrollbar-thumb { background: rgba(255,255,255,.15); border-radius: 999px; }
+    .highlight {
+      background: linear-gradient(90deg, rgba(147,197,253,.18), rgba(168,85,247,.18));
+      border-left: 3px solid rgba(147,197,253,.7);
+    }
+    .grid-auto {
+      display: grid;
+      grid-template-columns: repeat(12, minmax(0,1fr));
+      gap: 1rem;
+    }
+    @media (max-width: 1024px) { .grid-auto { grid-template-columns: repeat(6, minmax(0,1fr)); } }
+    @media (max-width: 640px) { .grid-auto { grid-template-columns: repeat(1, minmax(0,1fr)); } }
+  </style>
+</head>
+<body class="min-h-screen bg-[var(--bg)] relative">
+  <div class="pointer-events-none absolute inset-0 -z-10" style="background: var(--grad);"></div>
+
+  <header class="max-w-7xl mx-auto px-6 pt-10 pb-8">
+    <div class="flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-xl shine grid place-items-center">
+          <i class="ph ph-brackets-angle text-2xl text-cyan-300"></i>
+        </div>
+        <div>
+          <div class="text-sm text-[var(--text-dim)]">Curriculum</div>
+          <h1 class="text-2xl sm:text-3xl font-semibold tracking-tight">
+            Python for Machine Learning
+          </h1>
+        </div>
+      </div>
+      <button class="btn ring-anim px-4 py-2 rounded-xl text-sm glass hover:bg-white/10">
+        <i class="ph ph-rocket-launch mr-2"></i>Start Guided Tour
+      </button>
+    </div>
+
+    <div class="mt-6 glass rounded-2xl p-5 sm:p-6">
+      <div class="flex flex-wrap items-center gap-3">
+        <span class="chip px-3 py-1 rounded-full text-xs">End-to-end ML Pipeline</span>
+        <span class="chip px-3 py-1 rounded-full text-xs">Memory Efficient</span>
+        <span class="chip px-3 py-1 rounded-full text-xs">Performance & Parallelism</span>
+        <span class="chip px-3 py-1 rounded-full text-xs">Interactive Demos</span>
+      </div>
+      <p class="mt-4 text-[var(--text-dim)]">
+        Six modules with code, visuals, and interactive demos. Click a module tab to jump. Run snippets to see outputs.
+      </p>
+      <div class="mt-4 flex items-center gap-4 text-xs text-[var(--text-dim)]">
+        <div class="kpi rounded-xl px-3 py-2">12+ Interactive Snippets</div>
+        <div class="kpi rounded-xl px-3 py-2">Charts & Visuals</div>
+        <div class="kpi rounded-xl px-3 py-2">Mobile-first UI</div>
+      </div>
+    </div>
+
+    <div class="mt-4 sticky top-0 z-30 backdrop-blur sticky-tabs">
+      <div class="flex gap-2 overflow-x-auto py-2">
+        <a href="#m1" class="btn glass px-3 py-2 rounded-xl text-sm whitespace-nowrap">Module 1: Internals</a>
+        <a href="#m2" class="btn glass px-3 py-2 rounded-xl text-sm whitespace-nowrap">Module 2: Functional</a>
+        <a href="#m3" class="btn glass px-3 py-2 rounded-xl text-sm whitespace-nowrap">Module 3: OOP for ML</a>
+        <a href="#m4" class="btn glass px-3 py-2 rounded-xl text-sm whitespace-nowrap">Module 4: Robustness</a>
+        <a href="#m5" class="btn glass px-3 py-2 rounded-xl text-sm whitespace-nowrap">Module 5: Performance</a>
+        <a href="#m6" class="btn glass px-3 py-2 rounded-xl text-sm whitespace-nowrap">Module 6: Libraries</a>
+      </div>
+    </div>
+  </header>
+
+  <main class="max-w-7xl mx-auto px-6 pb-20 space-y-14">
+    <!-- Utility: Reusable code block -->
+    <template id="code-block">
+      <div class="glass rounded-xl overflow-hidden">
+        <div class="flex items-center justify-between px-3 py-2 code-actions">
+          <div class="flex items-center gap-2 text-xs text-[var(--text-dim)]">
+            <i class="ph ph-code"></i><span>Python</span>
+          </div>
+          <div class="flex items-center gap-2">
+            <button class="px-2 py-1 rounded-lg text-xs flex items-center gap-1 copy-btn"><i class="ph ph-copy"></i>Copy</button>
+            <button class="px-2 py-1 rounded-lg text-xs flex items-center gap-1 run-btn"><i class="ph ph-play"></i>Run (Pseudo)</button>
+          </div>
+        </div>
+        <pre class="m-0"><code class="language-python code"></code></pre>
+        <div class="px-4 pb-4 hidden result"></div>
+      </div>
+    </template>
+
+    <!-- Module 1 -->
+    <section id="m1" class="section-card glass rounded-2xl p-6">
+      <div class="flex items-start justify-between gap-4 flex-wrap">
+        <div>
+          <h2 class="text-xl sm:text-2xl font-semibold grad-txt">Module 1: Python Internals & Data Structures</h2>
+          <p class="mt-2 text-[var(--text-dim)]">Execution model, mutability, copies, and efficient containers.</p>
+        </div>
+        <div class="flex gap-2">
+          <span class="chip px-3 py-1 rounded-full text-xs">Memory</span>
+          <span class="chip px-3 py-1 rounded-full text-xs">Clean Data</span>
+        </div>
+      </div>
+
+      <div class="mt-6 grid-auto">
+        <div class="col-span-12 lg:col-span-7 space-y-5">
+          <div class="highlight rounded-xl p-4">
+            Python passes references to objects. Immutable objects (int, str, tuple) create new objects on change; mutables (list, dict, set) modify in-place.
+          </div>
+
+          <div id="m1-snippets" class="space-y-5"></div>
+        </div>
+
+        <div class="col-span-12 lg:col-span-5">
+          <div class="glass rounded-2xl p-5 h-full">
+            <h3 class="font-semibold mb-3">Memory Visualization</h3>
+            <canvas id="m1Chart" height="220"></canvas>
+            <p class="mt-3 text-sm text-[var(--text-dim)]">Relative memory estimates: tuples vs lists; sets/dicts store hashed keys.</p>
+            <ul class="mt-3 text-sm list-disc ml-5 text-[var(--text-dim)]">
+              <li>Use tuples for fixed records</li>
+              <li>Prefer set membership O(1)</li>
+              <li>Use comprehensions for concise transforms</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Module 2 -->
+    <section id="m2" class="section-card glass rounded-2xl p-6">
+      <div class="flex items-start justify-between gap-4 flex-wrap">
+        <div>
+          <h2 class="text-xl sm:text-2xl font-semibold grad-txt">Module 2: Functional Programming & Iterators</h2>
+          <p class="mt-2 text-[var(--text-dim)]">Lambdas, map/filter/reduce, generators, and lazy pipelines.</p>
+        </div>
+        <div class="flex gap-2">
+          <span class="chip px-3 py-1 rounded-full text-xs">Efficient</span>
+          <span class="chip px-3 py-1 rounded-full text-xs">Lazy Eval</span>
+        </div>
+      </div>
+
+      <div class="mt-6 grid-auto">
+        <div class="col-span-12 lg:col-span-7 space-y-5" id="m2-snippets"></div>
+        <div class="col-span-12 lg:col-span-5">
+          <div class="glass rounded-2xl p-5 h-full">
+            <h3 class="font-semibold mb-3">Generator vs List Memory</h3>
+            <canvas id="m2Chart" height="220"></canvas>
+            <p class="mt-3 text-sm text-[var(--text-dim)]">Generators stream values; lists store all elements.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Module 3 -->
+    <section id="m3" class="section-card glass rounded-2xl p-6">
+      <div class="flex items-start justify-between gap-4 flex-wrap">
+        <div>
+          <h2 class="text-xl sm:text-2xl font-semibold grad-txt">Module 3: OOP for ML Pipelines</h2>
+          <p class="mt-2 text-[var(--text-dim)]">Classes, magic methods, and modular pipeline design.</p>
+        </div>
+        <div class="flex gap-2">
+          <span class="chip px-3 py-1 rounded-full text-xs">Reusable</span>
+          <span class="chip px-3 py-1 rounded-full text-xs">Modular</span>
+        </div>
+      </div>
+      <div class="mt-6 grid-auto">
+        <div class="col-span-12 lg:col-span-7 space-y-5" id="m3-snippets"></div>
+        <div class="col-span-12 lg:col-span-5">
+          <div class="glass rounded-2xl p-5">
+            <h3 class="font-semibold mb-3">Pipeline Stages</h3>
+            <div class="space-y-3">
+              <div class="flex items-center gap-3 p-3 rounded-xl glass">
+                <div class="w-8 h-8 rounded-lg bg-cyan-500/20 grid place-items-center text-cyan-300"><i class="ph ph-faders"></i></div>
+                <div>
+                  <div class="text-sm font-medium">Transform</div>
+                  <div class="text-xs text-[var(--text-dim)]">Clean and encode features</div>
+                </div>
+              </div>
+              <div class="flex items-center gap-3 p-3 rounded-xl glass">
+                <div class="w-8 h-8 rounded-lg bg-violet-500/20 grid place-items-center text-violet-300"><i class="ph ph-brain"></i></div>
+                <div>
+                  <div class="text-sm font-medium">Model</div>
+                  <div class="text-xs text-[var(--text-dim)]">Fit/predict interface</div>
+                </div>
+              </div>
+              <div class="flex items-center gap-3 p-3 rounded-xl glass">
+                <div class="w-8 h-8 rounded-lg bg-sky-500/20 grid place-items-center text-sky-300"><i class="ph ph-chart-line-up"></i></div>
+                <div>
+                  <div class="text-sm font-medium">Evaluate</div>
+                  <div class="text-xs text-[var(--text-dim)]">Metrics and validation</div>
+                </div>
+              </div>
+            </div>
+            <p class="mt-3 text-sm text-[var(--text-dim)]">Encapsulate steps with a common interface for reuse.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Module 4 -->
+    <section id="m4" class="section-card glass rounded-2xl p-6">
+      <div class="flex items-start justify-between gap-4 flex-wrap">
+        <div>
+          <h2 class="text-xl sm:text-2xl font-semibold grad-txt">Module 4: Exception, File Handling & Modules</h2>
+          <p class="mt-2 text-[var(--text-dim)]">Robust I/O, custom errors, and packaging.</p>
+        </div>
+        <div class="flex gap-2">
+          <span class="chip px-3 py-1 rounded-full text-xs">Robust</span>
+          <span class="chip px-3 py-1 rounded-full text-xs">Production</span>
+        </div>
+      </div>
+      <div class="mt-6 grid-auto">
+        <div class="col-span-12 lg:col-span-7 space-y-5" id="m4-snippets"></div>
+        <div class="col-span-12 lg:col-span-5">
+          <div class="glass rounded-2xl p-5">
+            <h3 class="font-semibold mb-3">Data Formats</h3>
+            <ul class="list-disc ml-5 text-sm text-[var(--text-dim)] space-y-1">
+              <li>CSV: tabular; stream with chunks</li>
+              <li>JSON: nested; use orjson/ujson for speed</li>
+              <li>Pickle: Python objects; ensure trusted source</li>
+            </ul>
+            <canvas id="m4Chart" class="mt-4" height="180"></canvas>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Module 5 -->
+    <section id="m5" class="section-card glass rounded-2xl p-6">
+      <div class="flex items-start justify-between gap-4 flex-wrap">
+        <div>
+          <h2 class="text-xl sm:text-2xl font-semibold grad-txt">Module 5: Performance & Parallelism</h2>
+          <p class="mt-2 text-[var(--text-dim)]">Profiling, vectorization, and parallel preprocessing.</p>
+        </div>
+        <div class="flex gap-2">
+          <span class="chip px-3 py-1 rounded-full text-xs">Speed</span>
+          <span class="chip px-3 py-1 rounded-full text-xs">Scalability</span>
+        </div>
+      </div>
+      <div class="mt-6 grid-auto">
+        <div class="col-span-12 lg:col-span-7 space-y-5" id="m5-snippets"></div>
+        <div class="col-span-12 lg:col-span-5">
+          <div class="glass rounded-2xl p-5">
+            <h3 class="font-semibold mb-3">Throughput Comparison</h3>
+            <canvas id="m5Chart" height="220"></canvas>
+            <p class="mt-3 text-sm text-[var(--text-dim)]">Vectorization and multiprocessing can accelerate workloads. GIL affects threads for CPU-bound tasks.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Module 6 -->
+    <section id="m6" class="section-card glass rounded-2xl p-6">
+      <div class="flex items-start justify-between gap-4 flex-wrap">
+        <div>
+          <h2 class="text-xl sm:text-2xl font-semibold grad-txt">Module 6: Python Libraries for ML (Usage)</h2>
+          <p class="mt-2 text-[var(--text-dim)]">Numpy, pandas, matplotlib, and scikit-learn workflow.</p>
+        </div>
+        <div class="flex gap-2">
+          <span class="chip px-3 py-1 rounded-full text-xs">End-to-end</span>
+          <span class="chip px-3 py-1 rounded-full text-xs">Visualization</span>
+        </div>
+      </div>
+      <div class="mt-6 grid-auto">
+        <div class="col-span-12 lg:col-span-7 space-y-5" id="m6-snippets"></div>
+        <div class="col-span-12 lg:col-span-5">
+          <div class="glass rounded-2xl p-5">
+            <h3 class="font-semibold mb-3">Evaluation Metrics</h3>
+            <canvas id="m6Chart" height="220"></canvas>
+            <p class="mt-3 text-sm text-[var(--text-dim)]">Visualizing accuracy, precision, recall, F1 for a toy classifier.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- CTA -->
+    <section class="glass rounded-2xl p-6 flex flex-col md:flex-row items-center justify-between gap-5">
+      <div>
+        <h3 class="text-xl font-semibold">Ready to build an ML pipeline?</h3>
+        <p class="text-[var(--text-dim)] mt-1">Use the snippets as a template and adapt to your data.</p>
+      </div>
+      <div class="flex gap-3">
+        <a href="#m3" class="btn glass px-4 py-2 rounded-xl">View Pipeline OOP</a>
+        <a href="#m6" class="btn glass px-4 py-2 rounded-xl">Try E2E Example</a>
+      </div>
+    </section>
+  </main>
+
+  <footer class="max-w-7xl mx-auto px-6 pb-12 text-center text-xs text-[var(--text-dim)]">
+    © 2026 ML Curriculum. Built with love for clean, fast Python.
+  </footer>
+
+  <script>
+    // Utility to create code blocks with run/copy and mock output
+    function addCode(parentId, code, outputHtml = "", note = "") {
+      const tpl = document.getElementById('code-block');
+      const node = tpl.content.cloneNode(true);
+      node.querySelector('.code').textContent = code.trim();
+      const res = node.querySelector('.result');
+      if (outputHtml) {
+        res.classList.remove('hidden');
+        res.innerHTML = outputHtml + (note ? '<div class="mt-2 text-xs text-[var(--text-dim)]">'+note+'</div>' : '');
+      }
+      document.getElementById(parentId).appendChild(node);
+    }
+    // Copy and Run (pseudo) handlers
+    document.addEventListener('click', async (e) => {
+      if (e.target.closest('.copy-btn')) {
+        const block = e.target.closest('.glass');
+        const code = block.querySelector('code').textContent;
+        try { await navigator.clipboard.writeText(code); e.target.closest('button').innerHTML = '<i class="ph ph-check"></i>Copied'; setTimeout(()=>{ e.target.closest('button').innerHTML = '<i class="ph ph-copy"></i>Copy'; }, 1200);} catch {}
+      }
+      if (e.target.closest('.run-btn')) {
+        const block = e.target.closest('.glass');
+        const res = block.querySelector('.result');
+        res.classList.remove('hidden');
+        res.innerHTML = '<div class="text-sm">Running in browser is simulated. Copy code to a Python shell to execute.</div>';
+      }
+    });
+
+    // Module 1 snippets
+    addCode('m1-snippets', `
+x = 10
+y = x
+print(id(x) == id(y))  # True: same immutable int object
+y += 1
+print(x, y)            # 10 11 (y rebinds to new object)`, `
+<div class="text-sm">Immutable ints: rebinding creates a new object.</div>`);
+
+    addCode('m1-snippets', `
+a = [1, 2, [3, 4]]
+b = a[:]              # shallow copy
+b[0] = 99
+b[2][0] = -1          # nested list still shared!
+print(a)              # [1, 2, [-1, 4]]
+print(b)              # [99, 2, [-1, 4]]
+
+import copy
+c = copy.deepcopy(a)  # deep copy breaks shared refs
+c[2][0] = 999
+print(a[2][0], c[2][0])`, `
+<div class="text-sm">Shallow vs deep copy illustrated.</div>`);
+
+    addCode('m1-snippets', `
+data = ["Alice", "bob", "BOB", "alice", "Eve", "eve"]
+# Clean: lower, deduplicate with set, stable order via dict.fromkeys
+clean = list(dict.fromkeys(s.lower() for s in data))
+print(clean)  # ['alice', 'bob', 'eve']
+
+# Frequency with Counter
+from collections import Counter
+freq = Counter(s.lower() for s in data)
+print(freq.most_common(2))`, `
+<div class="text-sm">Memory-efficient deduplication and counting.</div>`);
+
+    addCode('m1-snippets', `
+# Dict & list comprehensions
+squares = {n: n*n for n in range(6)}
+even_labels = ["even" if n % 2 == 0 else "odd" for n in range(6)]
+print(squares)
+print(even_labels)`, `
+<div class="text-sm">Concise transformations with comprehensions.</div>`);
+
+    // M1 Chart
+    const m1ctx = document.getElementById('m1Chart');
+    new Chart(m1ctx, {
+      type: 'bar',
+      data: {
+        labels: ['tuple(1k)', 'list(1k)', 'set(1k)', 'dict(1k)'],
+        datasets: [{
+          label: 'Relative memory (arbitrary units)',
+          data: [1, 1.6, 2.0, 2.8],
+          backgroundColor: ['#60a5fa55','#a78bfa55','#22d3ee55','#34d39955'],
+          borderColor: ['#60a5fa','#a78bfa','#22d3ee','#34d399'],
+          borderWidth: 1.5
+        }]
+      },
+      options: {
+        plugins: { legend: { display: false } },
+        scales: { y: { beginAtZero: true, grid: { color: 'rgba(255,255,255,.06)' } }, x: { grid: { display: false } } }
+      }
+    });
+
+    // Module 2 snippets
+    addCode('m2-snippets', `
+nums = [1,2,3,4,5,6]
+doubles = list(map(lambda x: x*2, nums))
+evens = list(filter(lambda x: x%2==0, nums))
+from functools import reduce
+prod = reduce(lambda a,b:a*b, nums, 1)
+print(doubles, evens, prod)`, `
+<div class="text-sm">map/filter/reduce for concise dataflows.</div>`);
+
+    addCode('m2-snippets', `
+# List vs generator expressions
+N = 10**6
+# lst = [i*i for i in range(N)]        # allocates memory for N items
+gen = (i*i for i in range(N))          # lazy: generates on demand
+first = next(gen); second = next(gen)
+print(first, second)`, `
+<div class="text-sm">Generators avoid holding all values in memory.</div>`);
+
+    addCode('m2-snippets', `
+def read_chunks(lines, size=3):
+    buf = []
+    for line in lines:
+        buf.append(line)
+        if len(buf) == size:
+            yield buf; buf = []
+    if buf: yield buf
+
+data = (str(i) for i in range(10))  # stream
+for chunk in read_chunks(data, size=4):
+    print(chunk)`, `
+<div class="text-sm">Generator function batches a stream lazily.</div>`);
+
+    // M2 Chart
+    const m2ctx = document.getElementById('m2Chart');
+    new Chart(m2ctx, {
+      type: 'line',
+      data: {
+        labels: ['0k','200k','400k','600k','800k','1,000k'],
+        datasets: [
+          { label: 'List memory (MB est.)', data: [0,8,16,24,32,40], borderColor:'#a78bfa', tension:.35 },
+          { label: 'Generator memory (MB)', data: [1,1,1,1,1,1], borderColor:'#22d3ee', tension:.35 }
+        ]
+      },
+      options: { plugins: { legend: { labels: { color: '#c7d2fe' } } }, scales: { y: { grid:{color:'rgba(255,255,255,.06)'} }, x: { grid: { display:false } } } }
+    });
+
+    // Module 3 snippets
+    addCode('m3-snippets', `
+class StandardScaler:
+    def __init__(self):
+        self.mean_ = None; self.std_ = None
+    def fit(self, X):
+        import numpy as np
+        self.mean_ = np.mean(X, axis=0)
+        self.std_ = np.std(X, axis=0) + 1e-8
+        return self
+    def transform(self, X):
+        return (X - self.mean_) / self.std_
+    def fit_transform(self, X):
+        return self.fit(X).transform(X)
+
+class DummyModel:
+    def __init__(self): self.coef_ = None
+    def fit(self, X, y): 
+        import numpy as np
+        self.coef_ = np.mean(X, axis=0) * (1 if np.mean(y)>0 else -1); return self
+    def predict(self, X):
+        import numpy as np
+        return (X @ self.coef_ > 0).astype(int)
+
+class Pipeline:
+    def __init__(self, steps): self.steps = steps
+    def fit(self, X, y=None):
+        for name, step in self.steps[:-1]: X = step.fit_transform(X)
+        model = self.steps[-1][1]; model.fit(X, y); self.steps[-1] = (self.steps[-1][0], model); return self
+    def predict(self, X):
+        for name, step in self.steps[:-1]: X = step.transform(X)
+        return self.steps[-1][1].predict(X)
+
+# Usage
+import numpy as np
+X = np.random.randn(6,3); y = np.array([0,1,1,0,1,0])
+pipe = Pipeline([('scaler', StandardScaler()), ('model', DummyModel())]).fit(X,y)
+print(pipe.predict(X))`, `
+<div class="text-sm">Composable pipeline with fit/transform/predict.</div>`);
+
+    addCode('m3-snippets', `
+# Magic methods for nicer debug
+class Sample:
+    def __init__(self, name, values): self.name, self.values = name, values
+    def __repr__(self): return f"Sample(name={self.name!r}, size={len(self.values)})"
+s = Sample("train", [1,2,3])
+print(s)`, `
+<div class="text-sm">Readable __repr__ improves logging and debugging.</div>`);
+
+    // Module 4 snippets
+    addCode('m4-snippets', `
+class DataError(Exception): pass
+
+def load_json(path):
+    import json, os
+    if not os.path.exists(path):
+        raise DataError(f"File not found: {path}")
+    try:
+        with open(path, "r", encoding="utf-8") as f:
+            return json.load(f)
+    except json.JSONDecodeError as e:
+        raise DataError(f"Invalid JSON: {e}") from e
+    finally:
+        pass  # cleanup hooks`, `
+<div class="text-sm">Custom exception wraps low-level errors with context.</div>`);
+
+    addCode('m4-snippets', `
+# CSV streaming with chunks
+import csv
+def read_csv(path, chunk=1000):
+    buf = []; 
+    with open(path, newline="", encoding="utf-8") as f:
+        r = csv.DictReader(f)
+        for row in r:
+            buf.append(row)
+            if len(buf)==chunk: yield buf; buf=[]
+        if buf: yield buf`, `
+<div class="text-sm">Chunked CSV reading to control memory.</div>`);
+
+    addCode('m4-snippets', `
+# Pickle save/load (trusted sources only)
+import pickle
+def save_model(model, path):
+    with open(path, "wb") as f: pickle.dump(model, f, protocol=pickle.HIGHEST_PROTOCOL)
+def load_model(path):
+    with open(path, "rb") as f: return pickle.load(f)`, `
+<div class="text-sm">Persist Python models; beware of untrusted input.</div>`);
+
+    // M4 Chart (speed score dummy)
+    const m4ctx = document.getElementById('m4Chart');
+    new Chart(m4ctx, {
+      type: 'radar',
+      data: {
+        labels: ['Ease', 'Speed', 'Human-readable', 'Safety', 'Size'],
+        datasets: [
+          { label: 'CSV', data: [8,6,9,8,6], borderColor:'#60a5fa', backgroundColor:'#60a5fa33' },
+          { label: 'JSON', data: [7,5,9,7,5], borderColor:'#a78bfa', backgroundColor:'#a78bfa33' },
+          { label: 'Pickle', data: [9,9,3,3,9], borderColor:'#34d399', backgroundColor:'#34d39933' },
+        ]
+      },
+      options: { plugins:{ legend:{ labels:{ color:'#c7d2fe' } } }, scales:{ r:{ grid:{ color:'rgba(255,255,255,.12)' }, pointLabels:{ color:'#c7d2fe' } } } }
+    });
+
+    // Module 5 snippets
+    addCode('m5-snippets', `
+# Profiling CPU-bound function
+import cProfile, pstats, io
+
+def work(n=300000):
+    s = 0
+    for i in range(n):
+        s += (i % 7) * (i % 13)
+    return s
+
+pr = cProfile.Profile(); pr.enable()
+work(); pr.disable()
+s = io.StringIO(); pstats.Stats(pr, stream=s).sort_stats("tottime").print_stats(5)
+print(s.getvalue().splitlines()[:8])`, `
+<div class="text-sm">Identify hotspots with cProfile.</div>`);
+
+    addCode('m5-snippets', `
+# Vectorization vs Python loops
+import numpy as np, time
+N = 2_000_00
+x = np.random.randn(N)
+t0=time.time(); y = [v*v for v in x]; t1=time.time()
+t2=time.time(); y2 = x*x; t3=time.time()
+print("loop:", round(t1-t0,4), "vec:", round(t3-t2,4))`, `
+<div class="text-sm">Numpy vectorization uses fast C loops.</div>`);
+
+    addCode('m5-snippets', `
+# Multiprocessing for CPU-bound tasks
+from multiprocessing import Pool, cpu_count
+def f(n): return sum(i*i for i in range(n))
+if __name__ == "__main__":
+    with Pool(processes=cpu_count()) as p:
+        print(p.map(f, [100000]*8))`, `
+<div class="text-sm">Bypass GIL with processes for CPU-bound tasks.</div>`);
+
+    // M5 Chart
+    const m5ctx = document.getElementById('m5Chart');
+    new Chart(m5ctx, {
+      type: 'bar',
+      data: {
+        labels: ['Pure Python', 'Vectorized (NumPy)', 'Multithreading', 'Multiprocessing'],
+        datasets: [{
+          label: 'Relative throughput (higher is better)',
+          data: [1, 12, 1.2, 6],
+          backgroundColor: ['#ef444455','#22d3ee55','#a3e63555','#a78bfa55'],
+          borderColor: ['#ef4444','#22d3ee','#a3e635','#a78bfa'],
+          borderWidth: 1.5
+        }]
+      },
+      options: { plugins:{ legend:{ display:false } }, scales:{ y:{ beginAtZero:true, grid:{ color:'rgba(255,255,255,.06)' } }, x:{ grid:{ display:false } } } }
+    });
+
+    // Module 6 snippets
+    addCode('m6-snippets', `
+import numpy as np, pandas as pd, matplotlib.pyplot as plt
+from sklearn.model_selection import train_test_split
+from sklearn.linear_model import LogisticRegression
+from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score
+
+# Data
+rng = np.random.default_rng(0)
+X = rng.normal(size=(300, 3))
+y = (X[:,0]*0.8 + X[:,1]*-0.6 + rng.normal(scale=0.5, size=300) > 0).astype(int)
+
+# Pandas ops
+df = pd.DataFrame(X, columns=list("ABC")); df["y"] = y
+df["A_z"] = (df["A"] - df["A"].mean()) / df["A"].std()
+
+# Train/test
+Xtr, Xte, ytr, yte = train_test_split(df[["A_z","B","C"]].values, y, test_size=0.3, random_state=42)
+clf = LogisticRegression(max_iter=1000).fit(Xtr, ytr)
+pred = clf.predict(Xte)
+
+# Metrics
+acc = accuracy_score(yte, pred)
+prec = precision_score(yte, pred)
+rec = recall_score(yte, pred)
+f1 = f1_score(yte, pred)
+print(acc, prec, rec, f1)`, `
+<div class="text-sm">End-to-end: prepare data, train, evaluate.</div>`);
+
+    addCode('m6-snippets', `
+# NumPy broadcasting
+import numpy as np
+X = np.array([[1,2,3],[4,5,6]])
+mean = X.mean(axis=0, keepdims=True)
+Xc = X - mean   # broadcast subtract
+print(Xc)`, `
+<div class="text-sm">Broadcasting centers columns without loops.</div>`);
+
+    // M6 Chart
+    const m6ctx = document.getElementById('m6Chart');
+    new Chart(m6ctx, {
+      type: 'bar',
+      data: {
+        labels: ['Accuracy', 'Precision', 'Recall', 'F1'],
+        datasets: [{
+          label: 'Score',
+          data: [0.86, 0.88, 0.83, 0.85],
+          backgroundColor: ['#60a5fa55','#a78bfa55','#22d3ee55','#34d39955'],
+          borderColor: ['#60a5fa','#a78bfa','#22d3ee','#34d399'],
+          borderWidth: 1.5
+        }]
+      },
+      options: {
+        plugins: { legend: { display:false } },
+        scales: { y: { beginAtZero:true, max:1, grid:{ color:'rgba(255,255,255,.06)' } }, x:{ grid:{ display:false } } }
+      }
+    });
+  </script>
+</body>
+</html>
